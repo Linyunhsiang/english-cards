@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>女兒的專屬字卡 - Lesson 3 音標加強版</title>
+    <style>
+        :root { --primary: #ff8e8e; --secondary: #ae3ec9; --bg: #fdf6f0; }
+        body { font-family: 'Segoe UI', 'PingFang TC', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding-top: 20px; }
+
+        .card-container { width: 340px; height: 480px; perspective: 1000px; cursor: pointer; }
+        .card { width: 100%; height: 100%; position: relative; transition: transform 0.6s; transform-style: preserve-3d; }
+        .card.is-flipped { transform: rotateY(180deg); }
+
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; border-radius: 25px; box-shadow: 0 15px 30px rgba(0,0,0,0.1); padding: 30px; text-align: center; box-sizing: border-box; background: white; border: 2px solid #eee; }
+        .card-back { transform: rotateY(180deg); background: #fff9db; justify-content: center; }
+
+        /* 單字樣式 */
+        .word { font-size: 38px; color: #d63384; font-weight: bold; margin-top: 40px; margin-bottom: 10px; }
+
+        /* 音標加強顯示 - 這是重點 */
+        .phonetic-box {
+            font-size: 24px;
+            color: #444;
+            background-color: #f0f0f0;
+            padding: 5px 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-family: "Lucida Sans Unicode", "Arial Unicode MS", sans-serif;
+            min-height: 35px;
+        }
+
+        .chinese { font-size: 32px; color: #333; font-weight: bold; margin-bottom: 10px; }
+        .pos { font-size: 18px; color: #ae3ec9; font-weight: bold; margin-bottom: 20px; }
+        .example { font-size: 16px; color: #555; text-align: left; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid var(--primary); }
+
+        .btn-group { margin-top: 25px; display: flex; gap: 15px; }
+        button { padding: 12px 25px; border: none; border-radius: 50px; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .audio-btn { background: var(--secondary); color: white; margin-top: 20px; }
+        .next-btn { background: var(--primary); color: white; width: 140px; }
+    </style>
+</head>
+<body>
+
+    <h2>Lesson 3: The Birthmark</h2>
+    <div id="progress" style="margin-bottom: 10px; color: #666;">卡片載入中...</div>
+
+    <div class="card-container" onclick="flipCard()">
+        <div class="card" id="card">
+            <div class="card-face card-front">
+                <div class="word" id="front-text">Word</div>
+                <div class="phonetic-box" id="phonetic-text">[ ]</div>
+                <button class="audio-btn" onclick="speak(); event.stopPropagation();">🔊 聽發音</button>
+            </div>
+            <div class="card-face card-back">
+                <div class="pos" id="pos-text">詞性</div>
+                <div class="chinese" id="back-text">中文翻譯</div>
+                <div class="example" id="example-text">Example sentence...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button onclick="prevCard(event)">上一個</button>
+        <button class="next-btn" onclick="nextCard(event)">下一個</button>
+    </div>
+
+    <script>
+        // 您的原始資料
+        const rawData = {
+          "vocabulary_and_phrases": {
+            "words_for_production": [
+              { "word": "grace", "pronunciation": "[ɡres]", "part_of_speech": "n. [U]", "chinese": "優美；優雅", "example_sentences": ["The cat leapt onto the windowsill with grace."] },
+              { "word": "desperately", "pronunciation": "[ˋdɛspərɪtlɪ]", "part_of_speech": "adv.", "chinese": "拚命地", "example_sentences": ["The mother desperately searched the crowded mall."] },
+              { "word": "reluctantly", "pronunciation": "[rɪˋlʌktəntlɪ]", "part_of_speech": "adv.", "chinese": "勉強地；不情願地", "example_sentences": ["John reluctantly agreed to tidy his bedroom."] },
+              { "word": "describe", "pronunciation": "[dɪˋskraɪb]", "part_of_speech": "vt.", "chinese": "描述", "example_sentences": ["People often describe Zoe as someone who is dedicated."] },
+              { "word": "shiver", "pronunciation": "[ˋʃɪvɚ]", "part_of_speech": "vi.", "chinese": "顫抖", "example_sentences": ["Jamie shivered with fear as the large dog drew nearer."] },
+              { "word": "faint", "pronunciation": "[fent]", "part_of_speech": "vi.", "chinese": "昏厥；暈倒", "example_sentences": ["After Ben ran for an hour in the heat, he nearly fainted."] },
+              { "word": "scientific", "pronunciation": "[ˌsaɪən'tɪfɪk]", "part_of_speech": "adj.", "chinese": "科學的", "example_sentences": ["The students conducted a scientific experiment."] },
+              { "word": "frustration", "pronunciation": "[ˌfrʌsˋtreʃən]", "part_of_speech": "n. [U]", "chinese": "懊惱；沮喪", "example_sentences": ["Harry yelled out in frustration when he was locked out."] },
+              { "word": "stubborn", "pronunciation": "[ˋstʌbɚn]", "part_of_speech": "adj.", "chinese": "頑固的；倔強的", "example_sentences": ["Despite his friends' advice, Jack remained stubborn."] },
+              { "word": "rage", "pronunciation": "[redʒ]", "part_of_speech": "n. [C, U]", "chinese": "暴怒；狂怒", "example_sentences": ["Kris stormed out of the room in a rage."] },
+              { "word": "concentration", "pronunciation": "[ˌkɑnsn'treʃən]", "part_of_speech": "n. [U]", "chinese": "專注", "example_sentences": ["Julia began to lose concentration after studying for hours."] },
+              { "word": "explain", "pronunciation": "[ɪkˋsplen]", "part_of_speech": "vt. vi.", "chinese": "解釋", "example_sentences": ["The coach carefully explained the rules of the competition."] },
+              { "word": "sincerity", "pronunciation": "[sɪnˋserətɪ]", "part_of_speech": "n. [U]", "chinese": "真誠", "example_sentences": ["Because George had said sorry with so much sincerity, Amy forgave him."] },
+              { "word": "confess", "pronunciation": "[kənˋfɛs]", "part_of_speech": "vt. vi.", "chinese": "坦白；認罪", "example_sentences": ["Kevin confessed that he was the one who actually drove it."] },
+              { "word": "restore", "pronunciation": "[rɪˋstor]", "part_of_speech": "vt.", "chinese": "使恢復；使復原", "example_sentences": ["Lisa is now fully restored to health."] },
+              { "word": "fade", "pronunciation": "[fed]", "part_of_speech": "vi.", "chinese": "逐漸消失", "example_sentences": ["Mark's dream of becoming a writer started to fade."] },
+              { "word": "hardly", "pronunciation": "[ˋhardlɪ]", "part_of_speech": "adv.", "chinese": "幾乎不", "example_sentences": ["Noah had no idea that Tammy sang so well. He could hardly believe it."] },
+              { "word": "trace", "pronunciation": "[tres]", "part_of_speech": "n. [C, U]", "chinese": "痕跡", "example_sentences": ["She had vanished without a trace."] },
+              { "word": "depart", "pronunciation": "[dɪˋpart]", "part_of_speech": "vt.", "chinese": "去世", "example_sentences": ["The soldier departed this world peacefully."] },
+              { "word": "regret", "pronunciation": "[rɪˋɡrɛt]", "part_of_speech": "n. [U, C]", "chinese": "懊悔；遺憾", "example_sentences": ["Henry expressed deep regret at not spending more time with her."] }
+            ]
+          }
+        };
+
+        // 轉換資料，確保每個項目都有音標
+        const lessonData = rawData.vocabulary_and_phrases.words_for_production.map(item => ({
+            word: item.word,
+            ipa: item.pronunciation || "", // 抓取音標
+            chinese: item.chinese,
+            pos: item.part_of_speech,
+            example: item.example_sentences[0]
+        }));
+
+        let currentIndex = 0;
+
+        function updateCard() {
+            const data = lessonData[currentIndex];
+            document.getElementById('front-text').innerText = data.word;
+
+            // 顯示音標，如果沒音標就顯示空括號
+            document.getElementById('phonetic-text').innerText = data.ipa || "[ ]";
+
+            document.getElementById('back-text').innerText = data.chinese;
+            document.getElementById('pos-text').innerText = data.pos;
+            document.getElementById('example-text').innerText = data.example;
+
+            document.getElementById('progress').innerText = `卡片：${currentIndex + 1} / ${lessonData.length}`;
+            document.getElementById('card').classList.remove('is-flipped');
+        }
+
+        function flipCard() {
+            document.getElementById('card').classList.toggle('is-flipped');
+        }
+
+        function nextCard(event) {
+            event.stopPropagation();
+            if (currentIndex < lessonData.length - 1) {
+                currentIndex++;
+                updateCard();
+            }
+        }
+
+        function prevCard(event) {
+            event.stopPropagation();
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCard();
+            }
+        }
+
+        function speak() {
+            const word = lessonData[currentIndex].word;
+            const msg = new SpeechSynthesisUtterance(word);
+            msg.lang = 'en-US';
+            msg.rate = 0.8;
+            window.speechSynthesis.speak(msg);
+        }
+
+        // 啟動
+        updateCard();
+    </script>
+</body>
+</html>
