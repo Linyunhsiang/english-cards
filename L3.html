@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 3 完整全功能字卡</title>
+    <style>
+        :root { --primary: #ff8e8e; --secondary: #ae3ec9; --bg: #fdf6f0; --tag-bg: #4dabf7; }
+        body { font-family: 'Segoe UI', 'PingFang TC', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding-top: 10px; }
+        .card-container { width: 340px; height: 500px; perspective: 1000px; cursor: pointer; margin-top: 10px; }
+        .card { width: 100%; height: 100%; position: relative; transition: transform 0.6s; transform-style: preserve-3d; }
+        .card.is-flipped { transform: rotateY(180deg); }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; border-radius: 25px; box-shadow: 0 15px 30px rgba(0,0,0,0.1); padding: 25px; text-align: center; box-sizing: border-box; background: white; border: 2px solid #eee; }
+        .card-back { transform: rotateY(180deg); background: #fff9db; justify-content: center; }
+
+        /* 標籤：區分單字、衍生字、片語 */
+        .type-tag { font-size: 12px; color: white; background: var(--tag-bg); padding: 4px 12px; border-radius: 50px; margin-bottom: 10px; font-weight: bold; }
+        .word { font-size: 34px; color: #d63384; font-weight: bold; margin-top: 20px; margin-bottom: 10px; word-break: break-word; }
+        .phonetic-box { font-size: 22px; color: #555; background-color: #f0f0f0; padding: 4px 15px; border-radius: 12px; margin-bottom: 15px; min-height: 35px; font-family: "Arial Unicode MS", sans-serif; }
+
+        .chinese { font-size: 30px; color: #333; font-weight: bold; margin-bottom: 8px; }
+        .pos { font-size: 16px; color: #ae3ec9; font-weight: bold; margin-bottom: 15px; }
+        .example { font-size: 15px; color: #444; text-align: left; background: #fff; padding: 12px; border-radius: 10px; border-left: 5px solid var(--primary); width: 100%; box-sizing: border-box; font-style: italic; }
+
+        .btn-group { margin-top: 20px; display: flex; gap: 15px; }
+        button { padding: 12px 20px; border: none; border-radius: 50px; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .audio-btn { background: var(--secondary); color: white; }
+        .next-btn { background: var(--primary); color: white; width: 120px; }
+    </style>
+</head>
+<body>
+
+    <h3 style="margin: 5px; color: #d63384;">Lesson 3: The Birthmark</h3>
+    <div id="progress" style="color: #666; font-weight: bold;">載入中...</div>
+
+    <div class="card-container" onclick="flipCard()">
+        <div class="card" id="card">
+            <div class="card-face card-front">
+                <div id="tag-text" class="type-tag">單字</div>
+                <div class="word" id="front-text">Word</div>
+                <div class="phonetic-box" id="phonetic-text"></div>
+                <button class="audio-btn" onclick="speak(); event.stopPropagation();">🔊 聽發音</button>
+            </div>
+            <div class="card-face card-back">
+                <div class="pos" id="pos-text">n.</div>
+                <div class="chinese" id="back-text">中文翻譯</div>
+                <div class="example" id="example-text">Example sentence...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button onclick="prevCard(event)">←</button>
+        <button class="next-btn" onclick="nextCard(event)">下一個</button>
+    </div>
+
+    <script>
+        const rawData = {
+          "words": [
+            { "w": "grace", "p": "[ɡres]", "pos": "n. [U]", "c": "優美；優雅", "e": "The cat leapt onto the windowsill with grace.", "t": "核心單字" },
+            { "w": "graceful", "p": "[ˋɡresfəl]", "pos": "adj.", "c": "優美的；優雅的", "e": "The ballet dancer's movements were so graceful.", "t": "衍生字" },
+            { "w": "desperately", "p": "[ˋdɛspərɪtlɪ]", "pos": "adv.", "c": "拚命地", "e": "The mother desperately searched for her child.", "t": "核心單字" },
+            { "w": "desperate", "p": "[ˋdɛspərɪt]", "pos": "adj.", "c": "渴望的", "e": "The little girl was desperate for attention.", "t": "衍生字" },
+            { "w": "reluctantly", "p": "[rɪˋlʌktəntlɪ]", "pos": "adv.", "c": "不情願地", "e": "John reluctantly agreed to tidy his bedroom.", "t": "核心單字" },
+            { "w": "describe", "p": "[dɪˋskraɪb]", "pos": "vt.", "c": "描述", "e": "People often describe Zoe as dedicated.", "t": "核心單字" },
+            { "w": "description", "p": "[dɪˋskrɪpʃən]", "pos": "n.", "c": "描述", "e": "Our guide will give a detailed description.", "t": "衍生字" },
+            { "w": "shiver", "p": "[ˋʃɪvɚ]", "pos": "vi.", "c": "顫抖", "e": "Jamie shivered with fear as the dog drew nearer.", "t": "核心單字" },
+            { "w": "faint", "p": "[fent]", "pos": "vi.", "c": "昏厥", "e": "After running in the heat, he nearly fainted.", "t": "核心單字" },
+            { "w": "scientific", "p": "[ˌsaɪən'tɪfɪk]", "pos": "adj.", "c": "科學的", "e": "The students conducted a scientific experiment.", "t": "核心單字" },
+            { "w": "frustration", "p": "[ˌfrʌsˋtreʃən]", "pos": "n.", "c": "懊惱；沮喪", "e": "Harry yelled out in frustration.", "t": "核心單字" },
+            { "w": "frustrate", "p": "[ˋfrʌsˌtret]", "pos": "vt.", "c": "使沮喪", "e": "It frustrates me that I can't speak fluently.", "t": "衍生字" },
+            { "w": "stubborn", "p": "[ˋstʌbɚn]", "pos": "adj.", "c": "頑固的", "e": "Jack remained stubborn and refused to change.", "t": "核心單字" },
+            { "w": "rage", "p": "[redʒ]", "pos": "n.", "c": "暴怒", "e": "Kris stormed out of the room in a rage.", "t": "核心單字" },
+            { "w": "concentration", "p": "[ˌkɑnsn'treʃən]", "pos": "n.", "c": "專注", "e": "Julia began to lose concentration.", "t": "核心單字" },
+            { "w": "concentrate", "p": "[ˋkɑnsnˌtret]", "pos": "vi.", "c": "專注；集中", "e": "Sandy was concentrating on the video game.", "t": "衍生字" },
+            { "w": "explain", "p": "[ɪkˋsplen]", "pos": "vt.", "c": "解釋", "e": "The coach explained the rules to the players.", "t": "核心單字" },
+            { "w": "explanation", "p": "[ˌɛksplə'neʃən]", "pos": "n.", "c": "解釋", "e": "The manager asked for an explanation.", "t": "衍生字" },
+            { "w": "sincerity", "p": "[sɪnˋserətɪ]", "pos": "n.", "c": "真誠", "e": "George apologized with so much sincerity.", "t": "核心單字" },
+            { "w": "confess", "p": "[kənˋfɛs]", "pos": "vt.", "c": "坦白", "e": "Kevin confessed that he drove the car.", "t": "核心單字" },
+            { "w": "restore", "p": "[rɪˋstor]", "pos": "vt.", "c": "使恢復", "e": "Lisa is now fully restored to health.", "t": "核心單字" },
+            { "w": "fade", "p": "[fed]", "pos": "vi.", "c": "逐漸消失", "e": "Mark's dream started to fade.", "t": "核心單字" },
+            { "w": "hardly", "p": "[ˋhardlɪ]", "pos": "adv.", "c": "幾乎不", "e": "He could hardly believe her beautiful voice.", "t": "核心單字" },
+            { "w": "trace", "p": "[tres]", "pos": "n.", "c": "痕跡", "e": "She had vanished without a trace.", "t": "核心單字" },
+            { "w": "depart", "p": "[dɪˋpart]", "pos": "vt.", "c": "去世；離開", "e": "The soldier departed this world peacefully.", "t": "核心單字" },
+            { "w": "regret", "p": "[rɪˋɡrɛt]", "pos": "n./vt.", "c": "遺憾", "e": "Henry expressed deep regret.", "t": "核心單字" },
+            // 片語區
+            { "w": "put aside", "p": "", "pos": "phr.", "c": "擱置", "e": "Maria put aside her dinner preparation.", "t": "重要片語" },
+            { "w": "from then on", "p": "", "pos": "phr.", "c": "從那時起", "e": "I decided to study seriously from then on.", "t": "重要片語" },
+            { "w": "all the more", "p": "", "pos": "phr.", "c": "更加；格外", "e": "She became all the more excited.", "t": "重要片語" },
+            { "w": "fly into a rage", "p": "", "pos": "phr.", "c": "勃然大怒", "e": "James heard the news and flew into a rage.", "t": "重要片語" },
+            { "w": "for one thing", "p": "", "pos": "phr.", "c": "首先；一方面", "e": "For one thing, the food is delicious.", "t": "重要片語" }
+          ]
+        };
+
+        let currentIndex = 0;
+        const list = rawData.words;
+
+        function updateCard() {
+            const data = list[currentIndex];
+            document.getElementById('tag-text').innerText = data.t;
+            document.getElementById('front-text').innerText = data.w;
+
+            const pBox = document.getElementById('phonetic-text');
+            pBox.innerText = data.p || "[ Phrase ]"; // 片語若無音標顯示標籤
+
+            document.getElementById('back-text').innerText = data.c;
+            document.getElementById('pos-text').innerText = data.pos;
+            document.getElementById('example-text').innerText = data.e;
+
+            document.getElementById('progress').innerText = `${currentIndex + 1} / ${list.length}`;
+            document.getElementById('card').classList.remove('is-flipped');
+        }
+
+        function flipCard() { document.getElementById('card').classList.toggle('is-flipped'); }
+
+        function nextCard(event) {
+            event.stopPropagation();
+            if (currentIndex < list.length - 1) { currentIndex++; updateCard(); }
+            else { alert("恭喜！本課全部單字片語背完囉！✨"); }
+        }
+
+        function prevCard(event) {
+            event.stopPropagation();
+            if (currentIndex > 0) { currentIndex--; updateCard(); }
+        }
+
+        function speak() {
+            const msg = new SpeechSynthesisUtterance(list[currentIndex].w);
+            msg.lang = 'en-US';
+            msg.rate = 0.8;
+            window.speechSynthesis.speak(msg);
+        }
+
+        updateCard();
+    </script>
+</body>
+</html>
