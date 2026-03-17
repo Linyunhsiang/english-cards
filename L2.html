@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 2 完整全功能字卡</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* --- 基礎設定 --- */
+        :root {
+            --primary: #ff8e8e;
+            --secondary: #ae3ec9;
+            --bg: #fdf6f0;
+            --tag-bg: #4dabf7;
+            --home-bg: #5c7cfa;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang TC', sans-serif;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding-top: 10px;
+        }
+
+        /* --- 字卡容器樣式 --- */
+        .card-container {
+            width: 340px;
+            height: 500px;
+            perspective: 1000px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .card.is-flipped { transform: rotateY(180deg); }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-radius: 25px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            padding: 25px;
+            text-align: center;
+            box-sizing: border-box;
+            background: white;
+            border: 2px solid #eee;
+        }
+
+        /* --- 字卡背面特有樣式 --- */
+        .card-back {
+            transform: rotateY(180deg);
+            background: #fff9db;
+            justify-content: flex-start;
+            padding-top: 60px; /* 與正面文字高度對齊 */
+        }
+
+        /* --- 文字與標籤樣式 --- */
+        .type-tag { font-size: 12px; color: white; background: var(--tag-bg); padding: 4px 12px; border-radius: 50px; margin-bottom: 10px; font-weight: bold; }
+        .word { font-size: 34px; color: #d63384; font-weight: bold; margin-top: 20px; margin-bottom: 10px; word-break: break-word; }
+        .phonetic-box { font-size: 22px; color: #555; background-color: #f0f0f0; padding: 4px 15px; border-radius: 12px; margin-bottom: 15px; min-height: 35px; font-family: "Arial Unicode MS", sans-serif; }
+
+        .chinese { font-size: 34px; color: #333; font-weight: bold; margin-bottom: 12px; }
+        .pos { font-size: 20px; color: #ae3ec9; font-weight: bold; margin-bottom: 15px; }
+        .example {
+            font-size: 20px;
+            line-height: 1.5;
+            color: #444;
+            text-align: left;
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 6px solid var(--primary);
+            width: 100%;
+            box-sizing: border-box;
+            font-style: italic;
+        }
+
+        /* --- 控制列與按鈕 --- */
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: 0.3s;
+        }
+
+        .audio-btn { background: var(--secondary); color: white; }
+        .next-btn { background: var(--primary); color: white; width: 110px; }
+        .prev-btn { background: #adb5bd; color: white; width: 110px; }
+
+        .home-icon-btn {
+            background: var(--home-bg);
+            color: white;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: 0.3s;
+        }
+
+        .home-icon-btn:hover { transform: scale(1.1); background: var(--secondary); }
+        .home-icon-btn .material-icons { font-size: 30px; }
+    </style>
+</head>
+<body>
+
+    <h3 style="margin: 5px; color: #d63384;">Lesson 2: My Mouth's in Airplane Mode!</h3>
+    <div id="progress" style="color: #666; font-weight: bold;">載入中...</div>
+
+    <div class="card-container" onclick="flipCard()">
+        <div class="card" id="card">
+            <div class="card-face card-front">
+                <div id="tag-text" class="type-tag">單字</div>
+                <div class="word" id="front-text">Word</div>
+                <div class="phonetic-box" id="phonetic-text"></div>
+                <button class="audio-btn" onclick="speak(); event.stopPropagation();">🔊 聽發音</button>
+            </div>
+            <div class="card-face card-back">
+                <div class="pos" id="pos-text">n.</div>
+                <div class="chinese" id="back-text">中文翻譯</div>
+                <div class="example" id="example-text">Example sentence...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button class="prev-btn" onclick="prevCard(event)">上一個</button>
+
+        <div class="home-icon-btn" onclick="location.href='index.html'">
+            <span class="material-icons">home</span>
+        </div>
+
+        <button class="next-btn" onclick="nextCard(event)">下一個</button>
+    </div>
+
+    <script>
+        // 1. 定義單字資料
+const rawData = {
+  "words": [
+    // --- Word Bank (基礎與補充字彙) ---
+    { "w": "texture", "p": "[ˋtɛkstʃɚ]", "pos": "n.", "c": "口感", "e": "People like the chewy texture of boba in milk tea.", "t": "基礎字彙" },
+    { "w": "temperature", "p": "[ˋtɛmprətʃɚ]", "pos": "n.", "c": "溫度", "e": "The temperature dropped suddenly last night.", "t": "基礎字彙" },
+    { "w": "convince", "p": "[kənˋvɪns]", "pos": "vt.", "c": "說服", "e": "She tried to convince me to go to the party.", "t": "基礎字彙" },
+    { "w": "swollen", "p": "[ˋswolən]", "pos": "adj.", "c": "腫脹的", "e": "His leg was swollen after the bee sting.", "t": "基礎字彙" },
+    { "w": "stretch", "p": "[strɛtʃ]", "pos": "vi./vt.", "c": "拉長；延伸", "e": "The cat stretched its body on the sofa.", "t": "基礎字彙" },
+    { "w": "fluid", "p": "[ˋfluɪd]", "pos": "n.", "c": "液體", "e": "The doctor told him to drink plenty of fluids.", "t": "基礎字彙" },
+    { "w": "pandemic", "p": "[pænˋdɛmɪk]", "pos": "n.", "c": "疫情", "e": "The pandemic changed the way we work and live.", "t": "基礎字彙" },
+    { "w": "allergic", "p": "[əˋlɝdʒɪk]", "pos": "adj.", "c": "過敏的", "e": "I am allergic to seafood.", "t": "基礎字彙" },
+    { "w": "allergen-free", "p": "", "pos": "adj.", "c": "不含過敏原的", "e": "This bread is allergen-free and safe to eat.", "t": "基礎字彙" },
+    { "w": "opening remark", "p": "", "pos": "n. phr.", "c": "開場白", "e": "The host made some opening remarks before the show.", "t": "基礎字彙" },
+
+    // --- 核心單字與衍生字 ---
+    { "w": "warn", "p": "[wɔrn]", "pos": "vt.", "c": "警告；提醒", "e": "Bill's parents warned him not to go mountain climbing.", "t": "核心單字" },
+    { "w": "warning", "p": "[ˋwɔrnɪŋ]", "pos": "n. [C]", "c": "警告", "e": "The fire department issued a warning that the building might collapse.", "t": "衍生字" },
+    { "w": "announcement", "p": "[əˋnaʊnsmǝnt]", "pos": "n. [C]", "c": "公告；廣播通知", "e": "Our English teacher made an announcement about the test.", "t": "核心單字" },
+    { "w": "announce", "p": "[əˋnaʊns]", "pos": "vt.", "c": "宣布", "e": "The champion announced that he will retire at the end of March.", "t": "衍生字" },
+    { "w": "research", "p": "[ˋrisɜtʃ]", "pos": "n. [U]", "c": "研究", "e": "Dr. Smith is doing research into how dolphins communicate.", "t": "核心單字" },
+    { "w": "research", "p": "[rɪˋsɜtʃ]", "pos": "vt.", "c": "研究", "e": "Medical experts have researched the causes of this disease.", "t": "衍生字" },
+    { "w": "flavor", "p": "[ˋflevɚ]", "pos": "n.", "c": "味道", "e": "The soup has no flavor. You should add some salt.", "t": "核心單字" },
+    { "w": "flavoring", "p": "[ˋflevərɪŋ]", "pos": "n.", "c": "調味料", "e": "Lucy prefers foods that don't have any added flavoring.", "t": "衍生字" },
+    { "w": "pressure", "p": "[ˋprɛʃɚ]", "pos": "n. [U]", "c": "壓力", "e": "The nurses are under great pressure to work long hours.", "t": "核心單字" },
+    { "w": "normally", "p": "[ˋnɔrmlɪ]", "pos": "adv.", "c": "通常", "e": "Uncle Frank normally reads the newspaper over breakfast.", "t": "核心單字" },
+    { "w": "normal", "p": "[ˋnɔrml]", "pos": "adj.", "c": "正常的", "e": "It is normal for cats to sleep twelve to sixteen hours a day.", "t": "衍生字" },
+    { "w": "distinguish", "p": "[dɪˋstɪŋɡwɪʃ]", "pos": "vi./vt.", "c": "分辨", "e": "Victor can easily distinguish a real painting from a copy.", "t": "核心單字" },
+    { "w": "accurately", "p": "[ˋækjərɪtlɪ]", "pos": "adv.", "c": "精確地", "e": "So far scientists cannot predict earthquakes accurately.", "t": "核心單字" },
+    { "w": "accurate", "p": "[ˋækjərɪt]", "pos": "adj.", "c": "精確的", "e": "Steve had his watch fixed because it was not accurate.", "t": "衍生字" },
+    { "w": "function", "p": "[ˋfʌŋkʃən]", "pos": "vi.", "c": "運作；起作用", "e": "This couch also functions as a bed for guests.", "t": "核心單字" },
+    { "w": "function", "p": "[ˋfʌŋkʃən]", "pos": "n. [C]", "c": "功能", "e": "Zoos perform the functions of offering enjoyment and education.", "t": "衍生字" },
+    { "w": "blame", "p": "[blem]", "pos": "vt.", "c": "歸咎於；責怪", "e": "The police blamed the drunken driver for the accident.", "t": "核心單字" },
+    { "w": "affect", "p": "[əˋfɛkt]", "pos": "vt.", "c": "影響", "e": "Global warming has greatly affected the lives of wild animals.", "t": "核心單字" },
+    { "w": "passenger", "p": "[ˋpæsndʒɚ]", "pos": "n. [C]", "c": "乘客", "e": "Passengers were glad to hear the flight was on time.", "t": "核心單字" },
+    { "w": "distract", "p": "[dɪˋstrækt]", "pos": "vt.", "c": "使分心", "e": "The loud music kept distracting him from his reading.", "t": "核心單字" },
+    { "w": "distraction", "p": "[dɪˋstrækʃən]", "pos": "n. [C]", "c": "使人分心的事物", "e": "With so many distractions, Tina found it difficult to study.", "t": "衍生字" },
+    { "w": "indicate", "p": "[ˋɪndəˌket]", "pos": "vt.", "c": "指出", "e": "Recent research indicates that children need more exercise.", "t": "核心單字" },
+    { "w": "indication", "p": "[ˌɪndəˋkeʃən]", "pos": "n.", "c": "跡象", "e": "A sore throat is normally an indication of a cold.", "t": "衍生字" },
+    { "w": "conditions", "p": "[kənˋdɪʃənz]", "pos": "n. pl.", "c": "情況；環境", "e": "Under normal conditions, my scooter functions well.", "t": "核心單字" },
+    { "w": "solution", "p": "[səˋluʃən]", "pos": "n. [C]", "c": "解決方法", "e": "The government is seeking a solution to air pollution.", "t": "核心單字" },
+    { "w": "solve", "p": "[sɑlv]", "pos": "vt.", "c": "解決", "e": "We can solve the garbage problem by recycling.", "t": "衍生字" },
+    { "w": "ingredient", "p": "[ɪnˋɡridiənt]", "pos": "n. [C]", "c": "材料；成分", "e": "This restaurant only uses natural ingredients.", "t": "核心單字" },
+    { "w": "recipe", "p": "[ˋrɛsəpɪ]", "pos": "n. [C]", "c": "食譜", "e": "Does this cookbook include a recipe for apple pie?", "t": "核心單字" },
+    { "w": "comparison", "p": "[kəmˋpærəsn]", "pos": "n.", "c": "比較", "e": "Taipei's cost of living is high. By comparison, other cities are cheaper.", "t": "核心單字" },
+    { "w": "compare", "p": "[kəmˋpɛr]", "pos": "vt.", "c": "比較", "e": "Don't always compare yourself with others.", "t": "衍生字" },
+    { "w": "remain", "p": "[rɪˋmen]", "pos": "vi.", "c": "保持", "e": "Judy found that most things remained unchanged.", "t": "核心單字" },
+    { "w": "provide", "p": "[prəˋvaɪd]", "pos": "vt.", "c": "提供", "e": "This hotel provides a nice breakfast for its guests.", "t": "核心單字" },
+    { "w": "pleasant", "p": "[ˋplɛznt]", "pos": "adj.", "c": "令人愉快的", "e": "It is pleasant to go for a walk on a cool evening.", "t": "核心單字" },
+
+    // --- 片語區 ---
+    { "w": "be used to", "p": "", "pos": "phr.", "c": "習慣", "e": "Arnold is already used to the weather on the island.", "t": "重要片語" },
+    { "w": "needless to say", "p": "", "pos": "phr.", "c": "不用說", "e": "Needless to say, she got a pay raise after her hard work.", "t": "重要片語" },
+    { "w": "believe it or not", "p": "", "pos": "phr.", "c": "信不信由你", "e": "Believe it or not, you have just won the lottery!", "t": "重要片語" },
+    { "w": "come up with", "p": "", "pos": "phr.", "c": "想出", "e": "We came up with a great plan for the surprise party.", "t": "重要片語" },
+    { "w": "in comparison with", "p": "", "pos": "phr.", "c": "和……相較之下", "e": "In comparison with Greenland, Taiwan is a small island.", "t": "重要片語" },
+    { "w": "regardless of", "p": "", "pos": "phr.", "c": "不管", "e": "The festival will be held regardless of the weather.", "t": "重要片語" }
+  ]
+};
+        // 2. 功能變數與邏輯
+        let currentIndex = 0;
+        const list = rawData.words;
+
+        function updateCard() {
+            const data = list[currentIndex];
+            document.getElementById('tag-text').innerText = data.t;
+            document.getElementById('front-text').innerText = data.w;
+            const pBox = document.getElementById('phonetic-text');
+            pBox.innerText = data.p || "[ Phrase ]";
+
+            document.getElementById('back-text').innerText = data.c;
+            document.getElementById('pos-text').innerText = data.pos;
+            document.getElementById('example-text').innerText = data.e;
+
+            document.getElementById('progress').innerText = `${currentIndex + 1} / ${list.length}`;
+            document.getElementById('card').classList.remove('is-flipped');
+        }
+
+        function flipCard() { document.getElementById('card').classList.toggle('is-flipped'); }
+
+        function nextCard(event) {
+            event.stopPropagation();
+            if (currentIndex < list.length - 1) {
+                currentIndex++;
+                updateCard();
+            } else {
+                alert("恭喜！本課全部單字片語背完囉！✨");
+            }
+        }
+
+        function prevCard(event) {
+            event.stopPropagation();
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCard();
+            }
+        }
+
+        function speak() {
+            const msg = new SpeechSynthesisUtterance(list[currentIndex].w);
+            msg.lang = 'en-US';
+            msg.rate = 0.8;
+            window.speechSynthesis.speak(msg);
+        }
+
+        // 3. 接收網址參數並啟動
+        function startLesson() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+
+            if (mode === 'shuffle') {
+                for (let i = list.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [list[i], list[j]] = [list[j], list[i]];
+                }
+            }
+            updateCard();
+        }
+
+        startLesson();
+    </script>
+</body>
+</html>

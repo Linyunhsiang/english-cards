@@ -9,16 +9,35 @@
             --aespa-purple: #ae3ec9;
             --aespa-blue: #4dabf7;
             --main-bg: #0b0e14;
-            --neon-glow: 0 0 15px rgba(174, 62, 201, 0.7);
+        }
+
+        /* 修正底圖位移：使用 100vw/100vh 並鎖定視窗 */
+        #fixed-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed; /* 關鍵：鎖定背景不隨內容捲動 */
+            z-index: -2;
+            transition: background-image 0.5s ease-in-out;
+            background-color: #000; /* 預防圖片沒讀到時是黑色的 */
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: -1;
         }
 
         body {
-            background-color: var(--main-bg);
-            /* 設定預設背景樣式 */
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
             color: #e9ecef;
             font-family: 'Orbitron', 'PingFang TC', sans-serif;
             display: flex;
@@ -26,97 +45,73 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            transition: background-image 0.5s ease-in-out;
-        }
-
-        /* 增加一個半透明遮罩層，確保文字在任何底圖下都清晰 */
-        .overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4); /* 40% 的黑色遮罩 */
-            z-index: -1;
+            overflow-x: hidden; /* 防止手機版左右晃動 */
         }
 
         h1 {
-            font-size: 3.5rem;
+            font-size: 3rem;
             margin-top: 60px;
-            letter-spacing: 6px;
+            letter-spacing: 5px;
             text-transform: uppercase;
             background: linear-gradient(to right, #fff, var(--aespa-purple), var(--aespa-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
+            text-align: center;
         }
 
         .subtitle {
-            font-size: 1rem;
+            font-size: 0.9rem;
             color: var(--aespa-blue);
             margin-bottom: 40px;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            text-shadow: 0 0 10px rgba(0,0,0,1);
+            text-shadow: 0 0 10px #000;
         }
 
-        /* 模式切換器 */
         .mode-selector {
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px); /* 磨砂玻璃效果 */
-            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
             border-radius: 50px;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             display: flex;
-            gap: 25px;
+            gap: 15px;
         }
 
-        .mode-option {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 15px;
-            font-weight: bold;
-        }
-
+        .mode-option { cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; }
         .mode-option input { display: none; }
-        .mode-option span { color: #aaa; transition: 0.3s; }
-        .mode-option input:checked + span {
-            color: #fff;
-            text-shadow: 0 0 10px var(--aespa-blue);
-        }
+        .mode-option span { color: #888; transition: 0.3s; }
+        .mode-option input:checked + span { color: #fff; text-shadow: 0 0 8px var(--aespa-blue); }
 
-        /* 課程卡片樣式微調 */
         .lesson-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             width: 90%;
-            max-width: 1000px;
+            max-width: 800px;
+            padding-bottom: 50px;
         }
 
         .lesson-card {
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 18px;
+            border-radius: 15px;
             padding: 25px;
-            position: relative;
             transition: 0.3s;
             cursor: pointer;
         }
 
-        .lesson-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--aespa-purple);
-            box-shadow: 0 0 20px rgba(174, 62, 201, 0.3);
-        }
-
-        .lesson-card h3 { margin: 0; color: #fff; }
-        .lesson-card p { color: #ccc; font-size: 0.9rem; margin-top: 10px; }
+        .lesson-card:hover { border-color: var(--aespa-purple); transform: scale(1.02); }
+        .lesson-card h3 { margin: 0; font-size: 1.4rem; }
+        .lesson-card p { color: #bbb; font-size: 0.85rem; margin-top: 10px; }
     </style>
 </head>
-<body id="bg-body">
+<body>
 
+    <div id="fixed-bg"></div>
     <div class="overlay"></div>
 
     <h1>MY WORLD</h1>
@@ -134,26 +129,24 @@
     </div>
 
     <div class="lesson-grid">
-        <div class="lesson-card" onclick="goToLesson('L1')"><h3>Lesson 1</h3><p>Level Up Mission 01</p></div>
-        <div class="lesson-card" onclick="goToLesson('L2')"><h3>Lesson 2</h3><p>Level Up Mission 02</p></div>
-        <div class="lesson-card" onclick="goToLesson('L3')"><h3>Lesson 3</h3><p>Level Up Mission 03</p></div>
+        <div class="lesson-card" onclick="goToLesson('L1')"><h3>Lesson 1</h3><p>The Heart of a Champion</p></div>
+        <div class="lesson-card" onclick="goToLesson('L2')"><h3>Lesson 2</h3><p>My Mouth's in Airplane Mode!</p></div>
+        <div class="lesson-card" onclick="goToLesson('L3')"><h3>Lesson 3</h3><p>The Birthmark</p></div>
     </div>
 
     <script>
-        // --- 亂數背景邏輯 ---
-        const totalImages = 5; // 如果你放了 5 張圖，這裡就寫 5
+        // 背景邏輯
+        const totalImages = 5;
         const randomNumber = Math.floor(Math.random() * totalImages) + 1;
+        const bgLayer = document.getElementById('fixed-bg');
+        bgLayer.style.backgroundImage = `url('img/bg${randomNumber}.jpg')`;
 
-        // 假設圖片路徑是 img/bg1.jpg, img/bg2.jpg ...
-        const bgPath = `img/bg${randomNumber}.jpg`;
-
-        // 套用背景
-        document.body.style.backgroundImage = `url('${bgPath}')`;
-
-        // --- 跳轉邏輯 ---
         function goToLesson(lessonId) {
             const mode = document.querySelector('input[name="playMode"]:checked').value;
-            window.location.href = `${lessonId}.html?mode=${mode}`;
+
+            // 修正跳轉：直接使用相對路徑，避免 GitHub Pages 的根目錄抓取錯誤
+            const target = lessonId + ".html?mode=" + mode;
+            window.location.href = target;
         }
     </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lesson 3 完整全功能字卡</title>
+    <title>Lesson 1 完整全功能字卡</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         /* --- 基礎設定 --- */
@@ -134,7 +134,7 @@
 </head>
 <body>
 
-    <h3 style="margin: 5px; color: #d63384;">Lesson 3: The Birthmark</h3>
+    <h3 style="margin: 5px; color: #d63384;">Lesson 1: The Heart of a Champion</h3>
     <div id="progress" style="color: #666; font-weight: bold;">載入中...</div>
 
     <div class="card-container" onclick="flipCard()">
@@ -165,42 +165,51 @@
 
     <script>
         // 1. 定義單字資料
-        const rawData = {
-          "words": [
-            { "w": "grace", "p": "[ɡres]", "pos": "n. [U]", "c": "優美；優雅", "e": "The cat leapt onto the windowsill with grace.", "t": "核心單字" },
-            { "w": "graceful", "p": "[ˋɡresfəl]", "pos": "adj.", "c": "優美的；優雅的", "e": "The ballet dancer's movements were so graceful.", "t": "衍生字" },
-            { "w": "desperately", "p": "[ˋdɛspərɪtlɪ]", "pos": "adv.", "c": "拚命地", "e": "The mother desperately searched for her child.", "t": "核心單字" },
-            { "w": "desperate", "p": "[ˋdɛspərɪt]", "pos": "adj.", "c": "渴望的", "e": "The little girl was desperate for attention.", "t": "衍生字" },
-            { "w": "reluctantly", "p": "[rɪˋlʌktəntlɪ]", "pos": "adv.", "c": "不情願地", "e": "John reluctantly agreed to tidy his bedroom.", "t": "核心單字" },
-            { "w": "describe", "p": "[dɪˋskraɪb]", "pos": "vt.", "c": "描述", "e": "People often describe Zoe as dedicated.", "t": "核心單字" },
-            { "w": "description", "p": "[dɪˋskrɪpʃən]", "pos": "n.", "c": "描述", "e": "Our guide will give a detailed description.", "t": "衍生字" },
-            { "w": "shiver", "p": "[ˋʃɪvɚ]", "pos": "vi.", "c": "顫抖", "e": "Jamie shivered with fear as the dog drew nearer.", "t": "核心單字" },
-            { "w": "faint", "p": "[fent]", "pos": "vi.", "c": "昏厥", "e": "After running in the heat, he nearly fainted.", "t": "核心單字" },
-            { "w": "scientific", "p": "[ˌsaɪən'tɪfɪk]", "pos": "adj.", "c": "科學的", "e": "The students conducted a scientific experiment.", "t": "核心單字" },
-            { "w": "frustration", "p": "[ˌfrʌsˋtreʃən]", "pos": "n.", "c": "懊惱；沮喪", "e": "Harry yelled out in frustration.", "t": "核心單字" },
-            { "w": "frustrate", "p": "[ˋfrʌsˌtret]", "pos": "vt.", "c": "使沮喪", "e": "It frustrates me that I can't speak fluently.", "t": "衍生字" },
-            { "w": "stubborn", "p": "[ˋstʌbɚn]", "pos": "adj.", "c": "頑固的", "e": "Jack remained stubborn and refused to change.", "t": "核心單字" },
-            { "w": "rage", "p": "[redʒ]", "pos": "n.", "c": "暴怒", "e": "Kris stormed out of the room in a rage.", "t": "核心單字" },
-            { "w": "concentration", "p": "[ˌkɑnsn'treʃən]", "pos": "n.", "c": "專注", "e": "Julia began to lose concentration.", "t": "核心單字" },
-            { "w": "concentrate", "p": "[ˋkɑnsnˌtret]", "pos": "vi.", "c": "專注；集中", "e": "Sandy was concentrating on the video game.", "t": "衍生字" },
-            { "w": "explain", "p": "[ɪkˋsplen]", "pos": "vt.", "c": "解釋", "e": "The coach explained the rules to the players.", "t": "核心單字" },
-            { "w": "explanation", "p": "[ˌɛksplə'neʃən]", "pos": "n.", "c": "解釋", "e": "The manager asked for an explanation.", "t": "衍生字" },
-            { "w": "sincerity", "p": "[sɪnˋserətɪ]", "pos": "n.", "c": "真誠", "e": "George apologized with so much sincerity.", "t": "核心單字" },
-            { "w": "confess", "p": "[kənˋfɛs]", "pos": "vt.", "c": "坦白", "e": "Kevin confessed that he drove the car.", "t": "核心單字" },
-            { "w": "restore", "p": "[rɪˋstor]", "pos": "vt.", "c": "使恢復", "e": "Lisa is now fully restored to health.", "t": "核心單字" },
-            { "w": "fade", "p": "[fed]", "pos": "vi.", "c": "逐漸消失", "e": "Mark's dream started to fade.", "t": "核心單字" },
-            { "w": "hardly", "p": "[ˋhardlɪ]", "pos": "adv.", "c": "幾乎不", "e": "He could hardly believe her beautiful voice.", "t": "核心單字" },
-            { "w": "trace", "p": "[tres]", "pos": "n.", "c": "痕跡", "e": "She had vanished without a trace.", "t": "核心單字" },
-            { "w": "depart", "p": "[dɪˋpart]", "pos": "vt.", "c": "去世；離開", "e": "The soldier departed this world peacefully.", "t": "核心單字" },
-            { "w": "regret", "p": "[rɪˋɡrɛt]", "pos": "n./vt.", "c": "遺憾", "e": "Henry expressed deep regret.", "t": "核心單字" },
-            { "w": "put aside", "p": "", "pos": "phr.", "c": "擱置", "e": "Maria put aside her dinner preparation.", "t": "重要片語" },
-            { "w": "from then on", "p": "", "pos": "phr.", "c": "從那時起", "e": "I decided to study seriously from then on.", "t": "重要片語" },
-            { "w": "all the more", "p": "", "pos": "phr.", "c": "更加；格外", "e": "She became all the more excited.", "t": "重要片語" },
-            { "w": "fly into a rage", "p": "", "pos": "phr.", "c": "勃然大怒", "e": "James heard the news and flew into a rage.", "t": "重要片語" },
-            { "w": "for one thing", "p": "", "pos": "phr.", "c": "首先；一方面", "e": "For one thing, the food is delicious.", "t": "重要片語" }
-          ]
-        };
+const rawData = {
+  "words": [
+    // --- Word Bank ---
+    { "w": "limp", "p": "[lɪmp]", "pos": "vi.", "c": "跛行", "e": "The runner had to limp to the finish line after hurting his ankle.", "t": "基礎字彙" },
+    { "w": "relay race", "p": "[ˋrile res]", "pos": "n.", "c": "接力賽", "e": "Our class won the 400-meter relay race.", "t": "基礎字彙" },
+    { "w": "baton", "p": "[bəˋtɑn]", "pos": "n.", "c": "接力棒", "e": "The runner passed the baton to her teammate.", "t": "基礎字彙" },
 
+    // --- 核心單字與衍生字 ---
+    { "w": "champion", "p": "[ˋtʃæmpɪən]", "pos": "n. [C]", "c": "冠軍", "e": "Howard will be crowned the world chess champion after winning the final.", "t": "核心單字" },
+    { "w": "dedication", "p": "[ˌdedəˋkeʃən]", "pos": "n. [U]", "c": "奉獻；投入", "e": "Doctor Parker shows total dedication to this project.", "t": "核心單字" },
+    { "w": "dedicate", "p": "[ˋdedəˌket]", "pos": "vt.", "c": "把……奉獻於", "e": "The author has dedicated himself to writing a book about night markets.", "t": "衍生字" },
+    { "w": "medal", "p": "[ˋmedl]", "pos": "n. [C]", "c": "獎牌", "e": "Liz dreamed of wearing a shiny gold medal around her neck.", "t": "核心單字" },
+    { "w": "injury", "p": "[ˋɪndʒərɪ]", "pos": "n.", "c": "受傷", "e": "After suffering a serious injury, the cyclist has no chance of winning.", "t": "核心單字" },
+    { "w": "injure", "p": "[ˋɪndʒɚ]", "pos": "vt.", "c": "使……受傷", "e": "Harry badly injured himself at the beach and was taken to the hospital.", "t": "衍生字" },
+    { "w": "success", "p": "[səkˋsɛs]", "pos": "n. [U]", "c": "成功", "e": "Monica had great success in her work and became a famous singer.", "t": "核心單字" },
+    { "w": "succeed", "p": "[səkˋsid]", "pos": "vi.", "c": "成功辦到", "e": "Kevin still succeeded in starting his own company.", "t": "衍生字" },
+    { "w": "successful", "p": "[səkˋsɛsfəl]", "pos": "adj.", "c": "成功的", "e": "If you want to be successful in your job, work hard.", "t": "衍生字" },
+    { "w": "pain", "p": "[pen]", "pos": "n.", "c": "疼痛", "e": "Alex experienced a sharp pain in his leg while hiking.", "t": "核心單字" },
+    { "w": "painful", "p": "[ˋpenfəl]", "pos": "adj.", "c": "疼痛的；令人痛苦的", "e": "The soldier wants to forget his painful memories of the war.", "t": "衍生字" },
+    { "w": "immediately", "p": "[ɪˋmidɪtlɪ]", "pos": "adv.", "c": "立即；馬上", "e": "I need to leave immediately, or I'll miss my plane.", "t": "核心單字" },
+    { "w": "immediate", "p": "[ɪˋmidɪt]", "pos": "adj.", "c": "立即的", "e": "The police took immediate action and arrived at the scene.", "t": "衍生字" },
+    { "w": "collapse", "p": "[kəˋlæps]", "pos": "vi./n.", "c": "倒下；倒塌", "e": "The woman felt dizzy and suddenly collapsed in the station.", "t": "核心單字" },
+    { "w": "medical", "p": "[ˋmedɪkl]", "pos": "adj.", "c": "醫療的", "e": "Lisa plans to attend medical school and become a doctor.", "t": "核心單字" },
+    { "w": "staff", "p": "[stæf]", "pos": "n.", "c": "全體員工", "e": "The hotel staff greets all guests in a polite way.", "t": "核心單字" },
+    { "w": "courage", "p": "[ˋkɜɪdʒ]", "pos": "n. [U]", "c": "勇氣", "e": "It takes courage for first-time swimmers to put their heads under water.", "t": "核心單字" },
+    { "w": "strength", "p": "[strɛŋθ]", "pos": "n. [U]", "c": "意志力；力量", "e": "It's important for a player to have enough mental strength.", "t": "核心單字" },
+    { "w": "strengthen", "p": "[ˋstrɛŋθən]", "pos": "vt.", "c": "強化", "e": "Spending holidays together strengthens the bond between family members.", "t": "衍生字" },
+    { "w": "support", "p": "[səˋport]", "pos": "n./vt.", "c": "支持", "e": "The crowd cheered loudly to show their support.", "t": "核心單字" },
+    { "w": "struggle", "p": "[ˋstrʌɡl]", "pos": "vi./n.", "c": "艱難前進；奮鬥", "e": "The truck struggled slowly up the steep hill.", "t": "核心單字" },
+    { "w": "pride", "p": "[praɪd]", "pos": "n. [U]", "c": "驕傲；得意", "e": "Neil took pride in his brother's determination.", "t": "核心單字" },
+    { "w": "proud", "p": "[praʊd]", "pos": "adj.", "c": "驕傲的；得意的", "e": "Laura's parents were very proud of her excellent score.", "t": "衍生字" },
+    { "w": "emotional", "p": "[ɪˋmoʃənl]", "pos": "adj.", "c": "情緒激動的", "e": "Mr. Jones got very emotional when his daughter graduated.", "t": "核心單字" },
+    { "w": "emotion", "p": "[ɪˋmoʃən]", "pos": "n.", "c": "情緒；情感", "e": "It's hard for Danny to express his emotions.", "t": "衍生字" },
+    { "w": "admiration", "p": "[ˌædməˋreʃən]", "pos": "n. [U]", "c": "欽佩", "e": "Fans showed their admiration for the amazing actor.", "t": "核心單字" },
+    { "w": "admire", "p": "[ədˋmaɪr]", "pos": "vt.", "c": "欽佩", "e": "Debbie deeply admires Jimmy for his generosity.", "t": "衍生字" },
+    { "w": "respect", "p": "[rɪˋspɛkt]", "pos": "n./vt.", "c": "尊敬；尊重", "e": "Mike had great respect for the wise old man.", "t": "核心單字" },
+
+    // --- 片語區 ---
+    { "w": "take off", "p": "", "pos": "phr.", "c": "出發；起飛", "e": "The firefighters took off at great speed toward the burning building.", "t": "重要片語" },
+    { "w": "have one's heart set on", "p": "", "pos": "phr.", "c": "一心一意想要...", "e": "Toby has his heart set on being an NBA player.", "t": "重要片語" },
+    { "w": "speed up", "p": "", "pos": "phr.", "c": "加速", "e": "We are behind schedule, so we need to speed up.", "t": "重要片語" },
+    { "w": "rise to one's feet", "p": "", "pos": "phr.", "c": "（重新）站起來", "e": "When the injured boxer rose to his feet, everyone clapped wildly.", "t": "重要片語" },
+    { "w": "carry...through", "p": "", "pos": "phr.", "c": "幫助……渡過難關", "e": "It was Evan's support that carried Mandy through.", "t": "重要片語" }
+  ]
+};
         // 2. 功能變數與邏輯
         let currentIndex = 0;
         const list = rawData.words;
