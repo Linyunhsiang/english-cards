@@ -3,143 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lesson 3 完整全功能字卡</title>
+    <title>Lesson 3: The Birthmark</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        /* --- 基礎設定 --- */
-        :root {
-            --primary: #ff8e8e;
-            --secondary: #ae3ec9;
-            --bg: #fdf6f0;
-            --tag-bg: #4dabf7;
-            --home-bg: #5c7cfa;
-        }
-
+        :root { --primary: #ff8e8e; --secondary: #ae3ec9; --bg: #fdf6f0; }
         body {
             font-family: 'Segoe UI', 'PingFang TC', sans-serif;
-            background: var(--bg);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding-top: 10px;
+            background: var(--bg); display: flex; flex-direction: column;
+            align-items: center; min-height: 100vh; margin: 0; padding-top: 10px;
         }
-
-        /* --- 字卡容器樣式 --- */
-        .card-container {
-            width: 340px;
-            height: 400px;
-            perspective: 1000px;
-            cursor: pointer;
-            margin-top: 10px;
+        #fixed-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-size: cover; background-position: center; z-index: -3; opacity: 0.1;
         }
-
-        .card {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-        }
-
+        .card-container { width: 340px; height: 480px; perspective: 1000px; cursor: pointer; margin-top: 10px; z-index: 10; }
+        .card { width: 100%; height: 100%; position: relative; transition: transform 0.6s; transform-style: preserve-3d; }
         .card.is-flipped { transform: rotateY(180deg); }
-
         .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border-radius: 25px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-            padding: 25px;
-            text-align: center;
-            box-sizing: border-box;
-            background: white;
-            border: 2px solid #eee;
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; display: flex; flex-direction: column;
+            align-items: center; border-radius: 25px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1); padding: 25px;
+            text-align: center; box-sizing: border-box;
+            background-color: white; border: 2px solid #eee;
+            overflow: hidden;
         }
-
-        /* --- 字卡背面特有樣式 --- */
-        .card-back {
-            transform: rotateY(180deg);
-            background: #fff9db;
-            justify-content: flex-start;
-            padding-top: 60px; /* 與正面文字高度對齊 */
+        /* ⭐ Q 版人物圖片樣式 ⭐ */
+        .q-char {
+            position: absolute; bottom: 0; right: 0;
+            width: 150px; height: auto; opacity: 0.12;
+            z-index: 1; pointer-events: none; display: none;
         }
-
-        /* --- 文字與標籤樣式 --- */
-        .type-tag { font-size: 12px; color: white; background: var(--tag-bg); padding: 4px 12px; border-radius: 50px; margin-bottom: 10px; font-weight: bold; }
-        .word { font-size: 34px; color: #d63384; font-weight: bold; margin-top: 20px; margin-bottom: 10px; word-break: break-word; }
-        .phonetic-box { font-size: 22px; color: #555; background-color: #f0f0f0; padding: 4px 15px; border-radius: 12px; margin-bottom: 15px; min-height: 35px; font-family: "Arial Unicode MS", sans-serif; }
-
-        .chinese { font-size: 34px; color: #333; font-weight: bold; margin-bottom: 12px; }
-        .pos { font-size: 20px; color: #ae3ec9; font-weight: bold; margin-bottom: 15px; }
-        .example {
-            font-size: 20px;
-            line-height: 1.5;
-            color: #444;
-            text-align: left;
-            background: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 6px solid var(--primary);
-            width: 100%;
-            box-sizing: border-box;
-            font-style: italic;
-        }
-
-        /* --- 控制列與按鈕 --- */
-        .btn-group {
-            margin-top: 25px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: 0.3s;
-        }
-
+        .card-back { transform: rotateY(180deg); background: #fff9db; justify-content: flex-start; padding-top: 60px; }
+        .type-tag, .word, .phonetic-box, .audio-btn { position: relative; z-index: 5; }
+        .type-tag { font-size: 12px; color: white; background: #4dabf7; padding: 4px 12px; border-radius: 50px; margin-bottom: 10px; font-weight: bold; }
+        .word { font-size: 34px; color: #d63384; font-weight: bold; margin-top: 20px; margin-bottom: 10px; }
+        .phonetic-box { font-size: 20px; color: #555; background-color: #f0f0f0; padding: 4px 15px; border-radius: 12px; margin-bottom: 15px; min-height: 35px; }
+        .chinese { font-size: 32px; color: #333; font-weight: bold; margin-bottom: 10px; }
+        .pos { font-size: 18px; color: #ae3ec9; font-weight: bold; margin-bottom: 15px; }
+        .example { font-size: 19px; line-height: 1.5; color: #444; text-align: left; background: #fff; padding: 15px; border-radius: 10px; border-left: 6px solid var(--primary); width: 100%; box-sizing: border-box; font-style: italic; }
+        .btn-group { margin-top: 20px; display: flex; align-items: center; gap: 15px; z-index: 20; }
+        button { padding: 12px 20px; border: none; border-radius: 50px; cursor: pointer; font-size: 16px; font-weight: bold; }
         .audio-btn { background: var(--secondary); color: white; }
         .next-btn { background: var(--primary); color: white; width: 110px; }
         .prev-btn { background: #adb5bd; color: white; width: 110px; }
-
-        .home-icon-btn {
-            background: var(--home-bg);
-            color: white;
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transition: 0.3s;
-        }
-
-        .home-icon-btn:hover { transform: scale(1.1); background: var(--secondary); }
-        .home-icon-btn .material-icons { font-size: 30px; }
+        .home-icon-btn { background: #5c7cfa; color: white; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     </style>
 </head>
 <body>
-
-    <h3 style="margin: 5px; color: #d63384;">Lesson 3: The Birthmark</h3>
+    <div id="fixed-bg"></div>
+    <h3 style="margin: 5px; color: #d63384;">Lesson 1: The Heart of a Champion</h3>
     <div id="progress" style="color: #666; font-weight: bold;">載入中...</div>
 
     <div class="card-container" onclick="flipCard()">
         <div class="card" id="card">
             <div class="card-face card-front">
+                <img src="img/aespa_k.png" id="char-k" class="q-char">
+                <img src="img/aespa_g.png" id="char-g" class="q-char">
+                <img src="img/aespa_w.png" id="char-w" class="q-char">
+                <img src="img/aespa_n.png" id="char-n" class="q-char">
+                
                 <div id="tag-text" class="type-tag">單字</div>
                 <div class="word" id="front-text">Word</div>
                 <div class="phonetic-box" id="phonetic-text"></div>
@@ -155,16 +78,11 @@
 
     <div class="btn-group">
         <button class="prev-btn" onclick="prevCard(event)">上一個</button>
-
-        <div class="home-icon-btn" onclick="location.href='index.html'">
-            <span class="material-icons">home</span>
-        </div>
-
+        <div class="home-icon-btn" onclick="location.href='index.html'"><span class="material-icons">home</span></div>
         <button class="next-btn" onclick="nextCard(event)">下一個</button>
     </div>
 
     <script>
-        // 1. 定義單字資料
         const rawData = {
           "words": [
             { "w": "grace", "p": "[ɡres]", "pos": "n. [U]", "c": "優美；優雅", "e": "The cat leapt onto the windowsill with grace.", "t": "核心單字" },
@@ -201,7 +119,7 @@
           ]
         };
 
-        // 2. 功能變數與邏輯
+
         let currentIndex = 0;
         const list = rawData.words;
 
@@ -209,59 +127,39 @@
             const data = list[currentIndex];
             document.getElementById('tag-text').innerText = data.t;
             document.getElementById('front-text').innerText = data.w;
-            const pBox = document.getElementById('phonetic-text');
-            pBox.innerText = data.p || "[ Phrase ]";
-
+            document.getElementById('phonetic-text').innerText = data.p || "[ Phrase ]";
             document.getElementById('back-text').innerText = data.c;
             document.getElementById('pos-text').innerText = data.pos;
             document.getElementById('example-text').innerText = data.e;
-
             document.getElementById('progress').innerText = `${currentIndex + 1} / ${list.length}`;
             document.getElementById('card').classList.remove('is-flipped');
         }
 
         function flipCard() { document.getElementById('card').classList.toggle('is-flipped'); }
+        function nextCard(event) { event.stopPropagation(); if (currentIndex < list.length - 1) { currentIndex++; updateCard(); } else { alert("全部背完囉！✨"); } }
+        function prevCard(event) { event.stopPropagation(); if (currentIndex > 0) { currentIndex--; updateCard(); } }
+        function speak() { const msg = new SpeechSynthesisUtterance(list[currentIndex].w); msg.lang = 'en-US'; window.speechSynthesis.speak(msg); }
 
-        function nextCard(event) {
-            event.stopPropagation();
-            if (currentIndex < list.length - 1) {
-                currentIndex++;
-                updateCard();
-            } else {
-                alert("恭喜！本課全部單字片語背完囉！✨");
-            }
-        }
+        window.onload = function() {
+            // A. 網頁底圖
+            const randomBg = Math.floor(Math.random() * 5) + 1;
+            document.getElementById('fixed-bg').style.backgroundImage = `url('img/bg${randomBg}.jpg')`;
 
-        function prevCard(event) {
-            event.stopPropagation();
-            if (currentIndex > 0) {
-                currentIndex--;
-                updateCard();
-            }
-        }
+            // B. 亂數挑選 Q 版人物顯示
+            const charIds = ['char-k', 'char-g', 'char-w', 'char-n'];
+            const randomCharId = charIds[Math.floor(Math.random() * charIds.length)];
+            document.getElementById(randomCharId).style.display = 'block';
 
-        function speak() {
-            const msg = new SpeechSynthesisUtterance(list[currentIndex].w);
-            msg.lang = 'en-US';
-            msg.rate = 0.8;
-            window.speechSynthesis.speak(msg);
-        }
-
-        // 3. 接收網址參數並啟動
-        function startLesson() {
+            // C. 洗牌模式
             const urlParams = new URLSearchParams(window.location.search);
-            const mode = urlParams.get('mode');
-
-            if (mode === 'shuffle') {
+            if (urlParams.get('mode') === 'shuffle') {
                 for (let i = list.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [list[i], list[j]] = [list[j], list[i]];
                 }
             }
             updateCard();
-        }
-
-        startLesson();
+        };
     </script>
 </body>
 </html>
